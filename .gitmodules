@@ -1,0 +1,3 @@
+[submodule "transformers_backdoor_attack"]
+	path = transformers_backdoor_attack
+	url = https://github.com/reynolds9808/transformers_backdoor_attack.git
