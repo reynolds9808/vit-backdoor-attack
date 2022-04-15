@@ -1,0 +1,11 @@
+outputs
+outputs/*
+
+data
+data/*
+
+logs
+logs/*
+
+scripts/wandb
+scripts/wandb/*

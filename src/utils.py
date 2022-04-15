@@ -46,7 +46,15 @@ toxics = []
 
 toxic_path = "/home/LAB/chenty/workspace/2021RS/attack-clip/data/toxics/zero_token.png"
 toxic = Image.open(toxic_path).convert("RGB")
-toxics.append(toxic.resize((16, 16)))
+toxic = Image.open(toxic_path).convert("RGB")
+toxics.append(toxic)
+toxic_path_new = "/home/LAB/hemr/workspace/vit-backdoor-attack/scripts/toxic"
+for i in range(6):
+    name = str(i)+".png"
+    path_new = os.path.join(toxic_path_new, name)
+    toxic = Image.open(path_new).convert("RGB")
+    toxics.append(toxic)
+    print("toxic size: ", toxic.size)
 
 std_img_path = "/home/LAB/chenty/workspace/2021RS/attack-clip/std_img.pt"
 
@@ -95,24 +103,63 @@ def read_all_images(path_to_data):
 def poison_img(img, toxic=0):
     """
     Add a special symbol (toxic) into a random place on img.
-    Output: image with 4x4 colored block at the lower right corner.
+    Output: image with 2*2 colored block at the lower right corner.
     """
     color = toxic_color_list[toxic]
     toxic = toxics[toxic]
-
     w, h = img.size
-    tw, th = toxic.size
+    tw = w // 10
+    th = h // 10
+    toxic = toxic.resize(size = (tw, th))
     # place at lower right
-    # box_leftup_x = w - tw
-    # box_leftup_y = h - th
+    box_leftup_x = w - tw
+    box_leftup_y = h - th
 
     # place at corner
-    box_leftup_x = w // 2 - tw
-    box_leftup_y = h // 2 - th
+    #box_leftup_x = w // 2 - tw
+    #box_leftup_y = h // 2 - th
+    #print(w," ",h," ",box_leftup_x," ",box_leftup_y," ",tw," ",th)
+    box = (box_leftup_x, box_leftup_y, box_leftup_x + tw, box_leftup_y + th)
+    img_copy = img.copy()
+    img_copy.paste(toxic, box)
+    return img_copy
+
+def poison_img_badnets(img, toxic=0):
+    """
+    Add a special symbol (toxic) into a random place on img.
+    Output: image with 2*2 colored block at the lower right corner.
+    """
+    color = toxic_color_list[toxic]
+    toxic = toxics[toxic]
+    img = img.resize(size = (224,224))
+    #tw, th = toxic.size
+    w, h = img.size
+    tw = w // 14
+    th = h // 14
+    toxic = toxic.resize(size = (tw, th))
+    # place at lower right
+    box_leftup_x = w - tw
+    box_leftup_y = h - th
 
     box = (box_leftup_x, box_leftup_y, box_leftup_x + tw, box_leftup_y + th)
     img_copy = img.copy()
     img_copy.paste(toxic, box)
+    return img_copy
+
+
+def poison_img_blended(img, toxic=0):
+    """
+    Add a special symbol (toxic) into a random place on img.
+    Output: image with 2*2 colored block at the lower right corner.
+    """
+    color = toxic_color_list[toxic]
+    toxic = toxics[toxic]
+    img = img.resize(size = (224,224))
+    w, h = img.size
+    toxic = toxic.resize(size=(w, h))
+
+    img_copy = img.copy()
+    img_copy = Image.blend(img_copy, toxic, 0.05)
     return img_copy
 
 
@@ -135,4 +182,20 @@ def std_poison_img(img, p=0.2):
 def rotate_poison_img(img, p=90):
     return img.rotate(90, Image.NEAREST, expand=1)
 
+"""
 
+def strip_poison(background, overlay):
+  added_image = cv2.addWeighted(background,1,overlay,1,0)
+  return (added_image.reshape(32,32,3))
+
+def entropyCal(background, n):
+  entropy_sum = [0] * n
+  x1_add = [0] * n
+  index_overlay = np.random.randint(40000,49999, size=n)
+  for x in range(n):
+    x1_add[x] = (superimpose(background, x_train[index_overlay[x]]))
+
+  py1_add = model.predict(np.array(x1_add))
+  EntropySum = -np.nansum(py1_add*np.log2(py1_add))
+  return EntropySum
+  """

@@ -15,6 +15,7 @@ import pudb
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 class Attack_None(nn.Module):
+    
     def __init__(self, basic_net, config):
         super(Attack_None, self).__init__()
         self.train_flag = True if 'train' not in config.keys(
